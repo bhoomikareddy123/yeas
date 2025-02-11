@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Love Story</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sans&display=swap');
+        body {
+            background-color: black;
+            text-align: center;
+            color: white;
+            font-family: 'Sans', sans-serif;
+        }
+        canvas {
+            border: 3px solid white;
+            display: block;
+            margin: 20px auto;
+            background: url('background-pixel.png') no-repeat center center;
+            background-size: cover;
+        }
+        #message {
+            font-size: 50px;
+            font-weight: bold;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Collect All the Blobs! ❤️</h1>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <p id="message">Will you be my valentine? 💖</p>
+    <audio id="bgMusic" src="background-music.mp3" loop autoplay></audio>
+    <audio id="collectSound" src="collect-heart.mp3"></audio>
+    <audio id="proposalMusic" src="proposal-music.mp3"></audio>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const bgMusic = document.getElementById("bgMusic");
+        const collectSound = document.getElementById("collectSound");
+        const proposalMusic = document.getElementById("proposalMusic");
+        const message = document.getElementById("message");
+
+        let player = { x: 50, y: 300, width: 40, height: 40, speed: 20 };
+        let blobs = [];
+        let allCollected = false;
+
+        function generateBlobs() {
+            let blobCount = Math.floor(Math.random() * 4) + 3; // Between 3 and 6 blobs
+            blobs = [];
+            for (let i = 0; i < blobCount; i++) {
+                blobs.push({
+                    x: Math.floor(Math.random() * (canvas.width - 30)) + 15,
+                    y: Math.floor(Math.random() * (canvas.height - 30)) + 15,
+                    collected: false
+                });
+            }
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = "pink";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawBlobs() {
+            blobs.forEach(blob => {
+                if (!blob.collected) {
+                    ctx.fillStyle = "red";
+                    ctx.beginPath();
+                    ctx.arc(blob.x, blob.y, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawBlobs();
+            checkCollision();
+            requestAnimationFrame(update);
+        }
+
+        function checkCollision() {
+            blobs.forEach(blob => {
+                if (
+                    player.x < blob.x + 15 &&
+                    player.x + player.width > blob.x &&
+                    player.y < blob.y + 15 &&
+                    player.y + player.height > blob.y
+                ) {
+                    if (!blob.collected) {
+                        blob.collected = true;
+                        collectSound.play();
+                    }
+                }
+            });
+            allCollected = blobs.every(blob => blob.collected);
+            if (allCollected) {
+                showProposal();
+            }
+        }
+
+        function showProposal() {
+            message.style.display = "block";
+            bgMusic.pause();
+            proposalMusic.play();
+        }
+
+        function move(direction) {
+            if (direction === "right") player.x += player.speed;
+            if (direction === "left") player.x -= player.speed;
+            if (direction === "up") player.y -= player.speed;
+            if (direction === "down") player.y += player.speed;
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowRight") move("right");
+            if (e.key === "ArrowLeft") move("left");
+            if (e.key === "ArrowUp") move("up");
+            if (e.key === "ArrowDown") move("down");
+        });
+
+        generateBlobs();
+        update();
+    </script>
+</body>
+</html>
+
+
+
+       
